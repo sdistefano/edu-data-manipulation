@@ -25,7 +25,7 @@ def main():
     for record in table.get_all():
         gmaps_link = record['fields']['Link de google maps']
         try:
-            lon, lat = gmaps_pattern.match(gmaps_link).groups()[0:2]
+            lat, lon = gmaps_pattern.match(gmaps_link).groups()[0:2]
         except:
             print(gmaps_link)
             print(gmaps_pattern.match(gmaps_link).groups())
@@ -48,6 +48,8 @@ def main():
                 bearing = 180+90/2
             elif card == 'Oeste':
                 bearing = 180+90
+            elif card == 'NorOeste':
+                bearing = 180+90+45
 
             loc = d.destination(start, bearing=bearing)
         else:
