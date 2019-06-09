@@ -1,8 +1,11 @@
+import json
+
 import airtable
 import yaml
 import geopy
 import geopy.distance
 import re, csv
+from geojson import Feature, Point, dump
 
 API_KEY = yaml.load(open('keys.yaml').read())['noa-geo-tableau']
 
@@ -21,6 +24,7 @@ d = geopy.distance.VincentyDistance(kilometers = 1)
 def main():
     table = airtable.Airtable('appoyHh1yElcTGgLd', 'x toponimos', api_key=API_KEY)
     data = []
+    features = []
 
     for record in table.get_all():
         gmaps_link = record['fields']['Link de google maps']
@@ -55,11 +59,14 @@ def main():
         else:
             loc = start
 
-        data.append({'name': record['fields']['Nombre'], 'lat': loc.latitude, 'lon': loc.longitude})
+        data.append({'name': record['fields']['Nombre'], 'loc': Point((loc.longitude, loc.latitude))})
+        features.append(
+            Feature(
+                geometry=Point((loc.longitude, loc.latitude)),
+                properties={'name': record['fields']['Nombre']}
+            )
+        )
 
-    with open('out.csv', 'w') as f:
-        writer = csv.DictWriter(f, fieldnames=data[0].keys())
-        writer.writeheader()
-        writer.writerows(data)
+    dump(features, open('out.geojson', 'w'))
 
 main()
